@@ -68,6 +68,7 @@ namespace Step60
   // problem are not usable yet. Parsing the parameter file is what ensures we
   // have all ingredients to build up our classes, and we design them so that if
   // parsing fails, or is not executed, the run is aborted.
+  
 
   template <int dim, int spacedim = dim>
   class DistributedLagrangeProblem
@@ -76,6 +77,8 @@ namespace Step60
     // The `Parameters` class is derived from ParameterAcceptor. This allows us
     // to use the ParameterAcceptor::add_parameter() method in its constructor.
     class Parameters : public ParameterAcceptor
+
+
     {
     public:
       Parameters();
@@ -122,6 +125,8 @@ namespace Step60
 
       // A flag to keep track if we were initialized or not
       bool initialized = false;
+
+
     };
 
     DistributedLagrangeProblem(const Parameters &parameters);
@@ -156,8 +161,14 @@ namespace Step60
 
     // Then the ones related to the embedded grid, with the DoFHandler
     // associated to the Lagrange multiplier `lambda`
+    //std::unique_ptr<Triangulation<dim, spacedim>> embedded_grid;
 
-    std::unique_ptr<Triangulation<dim, spacedim>> embedded_grid;
+    //std::unique_ptr<Triangulation<dim, spacedim>> embedded_grid1;
+    //std::unique_ptr<Triangulation<dim, spacedim>> embedded_gridn;
+
+    Triangulation<dim, spacedim> embedded_grid;
+
+
     std::unique_ptr<FiniteElement<dim, spacedim>> embedded_fe;
     std::unique_ptr<DoFHandler<dim, spacedim>>    embedded_dh;
 
@@ -279,18 +290,13 @@ namespace Step60
     // Initializing $\Omega$: constructing the Triangulation and wrapping it
     // into a `std::unique_ptr` object
     space_grid = std_cxx14::make_unique<Triangulation<spacedim>>();
+    const Point<spacedim> centerpoint_embedding(0.0, 0.0);
+    GridGenerator::hyper_ball(*space_grid, centerpoint_embedding, 1, false);
 
-    // Next, we actually create the triangulation
-    // Set le dernier argument à false sinon le mapping du centre se fait mal
-    //if (spacedim == 2) {
-    //  const Point<spacedim> centerpoint(0.0, 0.0);
-    //}
-    //else if (spacedim == 3) {
-    //  const Point<spacedim> centerpoint(0.0, 0.0, 0.0);
-    //}
-    const Point<spacedim> centerpoint(0.0, 0.0);
-    GridGenerator::hyper_ball(*space_grid, centerpoint, 1, false);
 
+    
+
+   
     // Once we constructed a Triangulation, we refine it globally according to
     // the specifications in the parameter file, and construct a
     // GridTools::Cache with it.
@@ -301,16 +307,40 @@ namespace Step60
     // The same is done with the embedded grid. Since the embedded grid is
     // deformed, we first need to setup the deformation mapping. We do so in the
     // following few lines:
+    const unsigned int nbelem = 2;
 
-    embedded_grid = std_cxx14::make_unique<Triangulation<dim, spacedim>>();
-    if (spacedim == 2) {
-      GridGenerator::hyper_cube(*embedded_grid);
+    Triangulation<dim, spacedim> embedded_grid1;
+    const Point<spacedim> centerpoint_elem1(0.35, 0.35);
+    GridGenerator::hyper_sphere(embedded_grid1, centerpoint_elem1, 0.2);
+
+    Triangulation<dim, spacedim> embedded_gridn;
+    const Point<spacedim> centerpoint_elemn(-0.35, -0.35);
+    GridGenerator::hyper_sphere(embedded_gridn, centerpoint_elemn, 0.2);
+
+
+    GridGenerator::merge_triangulations(embedded_grid1, embedded_gridn, embedded_grid);
+
+
+
+    
+
+    if (nbelem ==1) {
+      
     }
-    else if (spacedim == 3) {
-      GridGenerator::hyper_sphere(*embedded_grid, centerpoint, 0.2);
+    else {
+      
+
     }
 
-    embedded_grid->refine_global(parameters.initial_embedded_refinement);
+    embedded_grid.refine_global(parameters.initial_embedded_refinement);
+
+    
+
+
+
+    
+
+    
 
     embedded_configuration_fe = std_cxx14::make_unique<FESystem<dim, spacedim>>(
       FE_Q<dim, spacedim>(
@@ -318,7 +348,7 @@ namespace Step60
       spacedim);
 
     embedded_configuration_dh =
-      std_cxx14::make_unique<DoFHandler<dim, spacedim>>(*embedded_grid);
+      std_cxx14::make_unique<DoFHandler<dim, spacedim>>(embedded_grid);
 
     embedded_configuration_dh->distribute_dofs(*embedded_configuration_fe);
     embedded_configuration.reinit(embedded_configuration_dh->n_dofs());
@@ -416,8 +446,10 @@ namespace Step60
     // This choice guarantees that almost every cell of the embedded grid spans
     // no more than two cells of the embedding grid, with some rare exceptions,
     // that are negligible in terms of the resulting inf-sup.
+    
     const double embedded_space_maximal_diameter =
-      GridTools::maximal_cell_diameter(*embedded_grid, *embedded_mapping);
+      GridTools::maximal_cell_diameter(embedded_grid, *embedded_mapping);
+    
     double embedding_space_minimal_diameter =
       GridTools::minimal_cell_diameter(*space_grid);
 
@@ -472,8 +504,10 @@ namespace Step60
   template <int dim, int spacedim>
   void DistributedLagrangeProblem<dim, spacedim>::setup_embedded_dofs()
   {
+    
     embedded_dh =
-      std_cxx14::make_unique<DoFHandler<dim, spacedim>>(*embedded_grid);
+      std_cxx14::make_unique<DoFHandler<dim, spacedim>>(embedded_grid);
+    
     embedded_fe = std_cxx14::make_unique<FE_Q<dim, spacedim>>(
       parameters.embedded_space_finite_element_degree);
     embedded_dh->distribute_dofs(*embedded_fe);
@@ -754,6 +788,7 @@ int main(int argc, char **argv)
       using namespace Step60;
 
       const unsigned int dim = 1, spacedim = 2;
+      
 
       // Differently to what happens in other tutorial programs, here we use
       // ParameterAcceptor style of initialization, i.e., all objects are first
