@@ -48,7 +48,8 @@
 #include <deal.II/lac/linear_operator_tools.h>
 #include <iostream>
 #include <fstream>
-
+#include <random>
+#include <ctime>
 
 namespace Step60
 {
@@ -162,9 +163,6 @@ namespace Step60
     // Then the ones related to the embedded grid, with the DoFHandler
     // associated to the Lagrange multiplier `lambda`
     //std::unique_ptr<Triangulation<dim, spacedim>> embedded_grid;
-
-    //std::unique_ptr<Triangulation<dim, spacedim>> embedded_grid1;
-    //std::unique_ptr<Triangulation<dim, spacedim>> embedded_gridn;
 
     Triangulation<dim, spacedim> embedded_grid;
 
@@ -307,21 +305,69 @@ namespace Step60
     // The same is done with the embedded grid. Since the embedded grid is
     // deformed, we first need to setup the deformation mapping. We do so in the
     // following few lines:
-    const unsigned int nbelem = 2;
+    const unsigned int nbelem = 5;
+    double radius = 0.2;
+    double xcoord;
+    double ycoord;
+    double rand_radius;
 
-    Triangulation<dim, spacedim> embedded_grid1;
-    const Point<spacedim> centerpoint_elem1(0.35, 0.35);
-    GridGenerator::hyper_sphere(embedded_grid1, centerpoint_elem1, 0.2);
+    //double upper_bound = 0.8;
+    //double lower_bound = -upper_bound;
+    //double rand1;
+    //double rand2;
+    //int interval = int((upper_bound-lower_bound)*100);
+    //std::srand(std::time(NULL));
+
 
     Triangulation<dim, spacedim> embedded_gridn;
-    const Point<spacedim> centerpoint_elemn(-0.35, -0.35);
-    GridGenerator::hyper_sphere(embedded_gridn, centerpoint_elemn, 0.2);
+    Point<spacedim> centerpoint_elemn(0.0, 0.0);
+    GridGenerator::hyper_sphere(embedded_gridn, centerpoint_elemn, radius);
+
+    for (unsigned int elem =0; elem < nbelem; elem++) {
+
+      // Point aléatoire dans cercle total
+      while (true) {
+        //std::uniform_real_distribution<double> unif(lower_bound, upper_bound);
+        //std::default_random_engine re;
+//
+        //xcoord = unif(re);
+        //ycoord = unif(re);
+
+        //rand1 = double(rand()%interval);
+        //rand2 = double(rand()%interval);
+//
+        //xcoord = lower_bound + rand1;
+        //ycoord = lower_bound + rand2;
+
+        xcoord = 0.2*(elem+1)-0.6;
+        ycoord = xcoord;
+
+        rand_radius = sqrt((xcoord*xcoord)+(ycoord*ycoord));
+        if (rand_radius < (1-radius)) {
+          break;
+        }
+      }
+
+      //std::cout<< "   " << elem << "   " << xcoord << "   " << ycoord << std::endl;
+
+      // Placer objet aux coordonnées obtenues
+      GridTools::shift(Point<spacedim>(xcoord, ycoord), embedded_gridn);
+      GridGenerator::merge_triangulations(embedded_grid, embedded_gridn, embedded_grid);
+
+      // Reset position objet à imbriquer
+      GridTools::shift(Point<spacedim>(-xcoord, -ycoord), embedded_gridn);
+      
+    }
+
+    
 
 
-    GridGenerator::merge_triangulations(embedded_grid1, embedded_gridn, embedded_grid);
+    //GridTools::shift(Point<spacedim>(-xcoord, -ycoord), embedded_gridn);
 
 
+    //GridGenerator::merge_triangulations(embedded_grid1, embedded_gridn, embedded_grid);
 
+    // utiliser un shift avec une mémoire de oû les points se retrouvent dans une boucle pour n éléments.
     
 
     if (nbelem ==1) {

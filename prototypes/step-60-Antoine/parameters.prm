@@ -6,8 +6,8 @@ set Embedded configuration finite element degree = 1
 set Embedded space finite element degree         = 1
 set Embedding space finite element degree        = 1
 set Homogeneous Dirichlet boundary ids           = 0, 1, 2, 3
-set Initial embedded space refinement            = 4
-set Initial embedding space refinement           = 2
+set Initial embedded space refinement            = 7
+set Initial embedding space refinement           = 5
 set Local refinements steps near embedded domain = 2
 set Use displacement in embedded interface       = false
 set Verbosity level                              = 10
@@ -38,7 +38,7 @@ set Function constants  = R=.2, Cx=.0, Cy=.0, Cz = 0.2               # default:
 # If the function you are describing represents a vector-valued function
 # with multiple components, then separate the expressions for individual
 # components by a semicolon.
-set Function expression = R*cos(2*pi*x)+Cx; R*sin(2*pi*x)+Cy  # default: 0
+set Function expression = x; y  # default: 0
 
 # The names of the variables as they will be used in the function,
 # separated by commas. By default, the names of variables at which the
@@ -100,8 +100,8 @@ set Log frequency = 1
 set Log history   = false
 set Log result    = true
 set Max steps     = 10000   # default: 100
-set Reduction     = 1.e-12 # default: 1.e-2
-set Tolerance     = 1.e-12 # default: 1.e-10
+set Reduction     = 1.e-2 # default: 1.e-2
+set Tolerance     = 1.e-10 # default: 1.e-10
 end
 
 end
