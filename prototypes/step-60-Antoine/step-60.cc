@@ -148,6 +148,7 @@ namespace Step60
     void solve();
 
     void L2_error();
+    void MoveEmbedded();
 
     void output_results();
 
@@ -305,7 +306,7 @@ namespace Step60
     // The same is done with the embedded grid. Since the embedded grid is
     // deformed, we first need to setup the deformation mapping. We do so in the
     // following few lines:
-    const unsigned int nbelem = 5;
+    const unsigned int nbelem = 2;
     double radius = 0.2;
     double xcoord;
     double ycoord;
@@ -322,6 +323,7 @@ namespace Step60
     Triangulation<dim, spacedim> embedded_gridn;
     Point<spacedim> centerpoint_elemn(0.0, 0.0);
     GridGenerator::hyper_sphere(embedded_gridn, centerpoint_elemn, radius);
+    //embedded_gridn.refine_global(parameters.initial_embedded_refinement);
 
     for (unsigned int elem =0; elem < nbelem; elem++) {
 
@@ -329,13 +331,13 @@ namespace Step60
       while (true) {
         //std::uniform_real_distribution<double> unif(lower_bound, upper_bound);
         //std::default_random_engine re;
-//
+        //
         //xcoord = unif(re);
         //ycoord = unif(re);
 
         //rand1 = double(rand()%interval);
         //rand2 = double(rand()%interval);
-//
+        //
         //xcoord = lower_bound + rand1;
         //ycoord = lower_bound + rand2;
 
@@ -348,10 +350,12 @@ namespace Step60
         }
       }
 
+      // Pour voir les coordonnées obtenues
       //std::cout<< "   " << elem << "   " << xcoord << "   " << ycoord << std::endl;
 
       // Placer objet aux coordonnées obtenues
       GridTools::shift(Point<spacedim>(xcoord, ycoord), embedded_gridn);
+      
       GridGenerator::merge_triangulations(embedded_grid, embedded_gridn, embedded_grid);
 
       // Reset position objet à imbriquer
@@ -359,32 +363,10 @@ namespace Step60
       
     }
 
-    
-
-
-    //GridTools::shift(Point<spacedim>(-xcoord, -ycoord), embedded_gridn);
-
-
-    //GridGenerator::merge_triangulations(embedded_grid1, embedded_gridn, embedded_grid);
-
-    // utiliser un shift avec une mémoire de oû les points se retrouvent dans une boucle pour n éléments.
-    
-
-    if (nbelem ==1) {
-      
-    }
-    else {
-      
-
-    }
+    // Pour le déplacement dans le temps
+    //MoveEmbedded();
 
     embedded_grid.refine_global(parameters.initial_embedded_refinement);
-
-    
-
-
-
-    
 
     
 
@@ -686,9 +668,6 @@ namespace Step60
     virtual double value(const Point<spacedim> & p,
                          const unsigned int component = 0) const override;
 
-    //virtual Tensor<1, spacedim>
-    //gradient(const Point<spacedim> & p,
-    //         const unsigned int component = 0) const override;
   };    
 
   // Calcul numérique de la solution telle qu'elle est réellement (calcul purement mathématique)
@@ -768,6 +747,24 @@ namespace Step60
     l2error = sqrt(l2errorU);
   }
 
+   // Déplacement dans le temps du maillage
+  int moves = 0;
+  template <int dim, int spacedim>
+  void DistributedLagrangeProblem<dim, spacedim>::MoveEmbedded()
+  {
+
+    double Deplacement_x = 0.5;
+    double Deplacement_y = 0.5;
+
+    GridTools::shift(Point<spacedim>(Deplacement_x, Deplacement_y), embedded_grid);
+
+    std::cout << "maille déplacée" << std::endl;
+    std::cout << "valeur de move : " << moves << std::endl;
+
+    moves++;
+
+  }
+
   // The following function simply generates standard result output on two
   // separate files, one for each mesh.
   template <int dim, int spacedim>
@@ -815,12 +812,27 @@ namespace Step60
     AssertThrow(parameters.initialized, ExcNotInitialized());
     deallog.depth_console(parameters.verbosity_level);
 
+    //int Deplacements =  2;
+    //
+    //for (int move = 0; move < Deplacements; move++) {
+    //  std::cout << "Situation #" << (move+1) << std::endl;
+    //
+    //  setup_grids_and_dofs();
+    //  setup_coupling();
+    //  assemble_system();
+    //  solve();
+    //  L2_error();
+    //  output_results();
+    //}
+    
     setup_grids_and_dofs();
+    MoveEmbedded();
     setup_coupling();
     assemble_system();
     solve();
     L2_error();
     output_results();
+
   }
 } // namespace Step60
 
@@ -844,6 +856,7 @@ int main(int argc, char **argv)
 
       DistributedLagrangeProblem<dim, spacedim>::Parameters parameters;
       DistributedLagrangeProblem<dim, spacedim>             problem(parameters);
+      
 
       std::string parameter_file;
       if (argc > 1)
@@ -852,7 +865,11 @@ int main(int argc, char **argv)
         parameter_file = "parameters.prm";
 
       ParameterAcceptor::initialize(parameter_file, "used_parameters.prm");
+
+
       problem.run();
+
+
     }
   catch (std::exception &exc)
     {
