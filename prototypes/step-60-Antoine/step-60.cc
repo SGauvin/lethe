@@ -139,6 +139,8 @@ namespace Step60
     // Object containing the actual parameters
     const Parameters &parameters;
 
+    void setup_mapping();
+
     void setup_grids_and_dofs();
     void setup_embedding_dofs();
     void setup_embedded_dofs();
@@ -282,7 +284,7 @@ namespace Step60
   // The function `DistributedLagrangeProblem::setup_grids_and_dofs()` is used
   // to set up the finite element spaces.
   template <int dim, int spacedim>
-  void DistributedLagrangeProblem<dim, spacedim>::setup_grids_and_dofs()
+  void DistributedLagrangeProblem<dim, spacedim>::setup_mapping()
   {
     TimerOutput::Scope timer_section(monitor, "Setup grids and dofs");
 
@@ -365,11 +367,13 @@ namespace Step60
 
     // Pour le déplacement dans le temps
     //MoveEmbedded();
-
     embedded_grid.refine_global(parameters.initial_embedded_refinement);
+  }
 
-    
 
+  template <int dim, int spacedim>
+  void DistributedLagrangeProblem<dim, spacedim>::setup_grids_and_dofs()
+  {
     embedded_configuration_fe = std_cxx14::make_unique<FESystem<dim, spacedim>>(
       FE_Q<dim, spacedim>(
         parameters.embedded_configuration_finite_element_degree),
@@ -753,13 +757,13 @@ namespace Step60
   void DistributedLagrangeProblem<dim, spacedim>::MoveEmbedded()
   {
 
-    double Deplacement_x = 0.5;
-    double Deplacement_y = 0.5;
+    double Deplacement_x = 0.2;
+    double Deplacement_y = 0.2;
 
     GridTools::shift(Point<spacedim>(Deplacement_x, Deplacement_y), embedded_grid);
 
     std::cout << "maille déplacée" << std::endl;
-    std::cout << "valeur de move : " << moves << std::endl;
+    //std::cout << "valeur de move : " << moves << std::endl;
 
     moves++;
 
@@ -812,26 +816,37 @@ namespace Step60
     AssertThrow(parameters.initialized, ExcNotInitialized());
     deallog.depth_console(parameters.verbosity_level);
 
-    //int Deplacements =  2;
-    //
-    //for (int move = 0; move < Deplacements; move++) {
-    //  std::cout << "Situation #" << (move+1) << std::endl;
-    //
-    //  setup_grids_and_dofs();
-    //  setup_coupling();
-    //  assemble_system();
-    //  solve();
-    //  L2_error();
-    //  output_results();
-    //}
+    int Deplacements =  4;
+
+    setup_mapping();
     
-    setup_grids_and_dofs();
-    MoveEmbedded();
-    setup_coupling();
-    assemble_system();
-    solve();
-    L2_error();
-    output_results();
+    for (int move = 0; move < Deplacements; move++) {
+      std::cout << "Situation #" << (move+1) << std::endl;
+    
+      setup_grids_and_dofs();
+      setup_coupling();
+      assemble_system();
+      solve();
+      L2_error();
+      output_results();
+
+      MoveEmbedded();
+    }
+    //setup_mapping();
+    //setup_grids_and_dofs();
+    //setup_coupling();
+    //assemble_system();
+    //solve();
+    //L2_error();
+    //output_results();
+    //
+    //MoveEmbedded();
+    //setup_grids_and_dofs();
+    //setup_coupling();
+    //assemble_system();
+    //solve();
+    //L2_error();
+    //output_results();
 
   }
 } // namespace Step60
