@@ -294,9 +294,6 @@ namespace Step60
     const Point<spacedim> centerpoint_embedding(0.0, 0.0);
     GridGenerator::hyper_ball(*space_grid, centerpoint_embedding, 1, false);
 
-
-    
-
    
     // Once we constructed a Triangulation, we refine it globally according to
     // the specifications in the parameter file, and construct a
@@ -308,43 +305,33 @@ namespace Step60
     // The same is done with the embedded grid. Since the embedded grid is
     // deformed, we first need to setup the deformation mapping. We do so in the
     // following few lines:
-    const unsigned int nbelem = 2;
+    const unsigned int nbelem = 5;
     double radius = 0.2;
     double xcoord;
     double ycoord;
     double rand_radius;
 
-    //double upper_bound = 0.8;
-    //double lower_bound = -upper_bound;
-    //double rand1;
-    //double rand2;
-    //int interval = int((upper_bound-lower_bound)*100);
-    //std::srand(std::time(NULL));
+    double upper_bound = (1-radius); // assume que le rayon total est de 1
+    double lower_bound = -upper_bound;
+    double rand1;
+    double rand2;
+    std::srand(std::time(NULL));
 
 
     Triangulation<dim, spacedim> embedded_gridn;
     Point<spacedim> centerpoint_elemn(0.0, 0.0);
     GridGenerator::hyper_sphere(embedded_gridn, centerpoint_elemn, radius);
-    //embedded_gridn.refine_global(parameters.initial_embedded_refinement);
 
     for (unsigned int elem =0; elem < nbelem; elem++) {
 
       // Point aléatoire dans cercle total
       while (true) {
-        //std::uniform_real_distribution<double> unif(lower_bound, upper_bound);
-        //std::default_random_engine re;
-        //
-        //xcoord = unif(re);
-        //ycoord = unif(re);
 
-        //rand1 = double(rand()%interval);
-        //rand2 = double(rand()%interval);
-        //
-        //xcoord = lower_bound + rand1;
-        //ycoord = lower_bound + rand2;
+		    rand1 = (double)rand() / RAND_MAX;
+		    xcoord = lower_bound + rand1 * (upper_bound - lower_bound);
 
-        xcoord = 0.2*(elem+1)-0.6;
-        ycoord = xcoord;
+		    rand2 = (double)rand() / RAND_MAX;
+		    ycoord = lower_bound + rand2 * (upper_bound - lower_bound);
 
         rand_radius = sqrt((xcoord*xcoord)+(ycoord*ycoord));
         if (rand_radius < (1-radius)) {
@@ -816,7 +803,7 @@ namespace Step60
     AssertThrow(parameters.initialized, ExcNotInitialized());
     deallog.depth_console(parameters.verbosity_level);
 
-    int Deplacements =  4;
+    int Deplacements =  1; // mettre 1 pour aucun déplacements
 
     setup_mapping();
     
@@ -832,21 +819,7 @@ namespace Step60
 
       MoveEmbedded();
     }
-    //setup_mapping();
-    //setup_grids_and_dofs();
-    //setup_coupling();
-    //assemble_system();
-    //solve();
-    //L2_error();
-    //output_results();
-    //
-    //MoveEmbedded();
-    //setup_grids_and_dofs();
-    //setup_coupling();
-    //assemble_system();
-    //solve();
-    //L2_error();
-    //output_results();
+  
 
   }
 } // namespace Step60
