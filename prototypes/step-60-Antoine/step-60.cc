@@ -305,7 +305,7 @@ namespace Step60
     // The same is done with the embedded grid. Since the embedded grid is
     // deformed, we first need to setup the deformation mapping. We do so in the
     // following few lines:
-    const unsigned int nbelem = 5;
+    const unsigned int nbelem = 2;
     double radius = 0.2;
     double xcoord;
     double ycoord;
@@ -744,8 +744,8 @@ namespace Step60
   void DistributedLagrangeProblem<dim, spacedim>::MoveEmbedded()
   {
 
-    double Deplacement_x = 0.2;
-    double Deplacement_y = 0.2;
+    double Deplacement_x = 0.1;
+    double Deplacement_y = 0.1;
 
     GridTools::shift(Point<spacedim>(Deplacement_x, Deplacement_y), embedded_grid);
 
@@ -758,6 +758,7 @@ namespace Step60
 
   // The following function simply generates standard result output on two
   // separate files, one for each mesh.
+  int vtu_output = 1;
   template <int dim, int spacedim>
   void DistributedLagrangeProblem<dim, spacedim>::output_results()
   {
@@ -765,7 +766,10 @@ namespace Step60
 
     DataOut<spacedim> embedding_out;
 
-    std::ofstream embedding_out_file("embedding.vtu");
+    
+    auto embedding_name = std::string("embedding_" + std::to_string(vtu_output) + ".vtu");
+    
+    std::ofstream embedding_out_file(embedding_name);
 
     embedding_out.attach_dof_handler(*space_dh);
     embedding_out.add_data_vector(solution, "solution");
@@ -781,7 +785,9 @@ namespace Step60
 
     DataOut<dim, DoFHandler<dim, spacedim>> embedded_out;
 
-    std::ofstream embedded_out_file("embedded.vtu");
+    auto embedded_name = std::string("embedded_" + std::to_string(vtu_output) + ".vtu");
+    
+    std::ofstream embedded_out_file(embedded_name);
 
     embedded_out.attach_dof_handler(*embedded_dh);
     embedded_out.add_data_vector(lambda, "lambda");
@@ -791,6 +797,7 @@ namespace Step60
     embedded_out.write_vtu(embedded_out_file);
 
     std::cout<< "L2 error = " << l2error << std::endl;
+    vtu_output++;
   }
 
   // Similar to all other tutorial programs, the `run()` function simply calls
@@ -803,7 +810,7 @@ namespace Step60
     AssertThrow(parameters.initialized, ExcNotInitialized());
     deallog.depth_console(parameters.verbosity_level);
 
-    int Deplacements =  1; // mettre 1 pour aucun déplacements
+    int Deplacements =  5; // mettre 1 pour aucun déplacements
 
     setup_mapping();
     
