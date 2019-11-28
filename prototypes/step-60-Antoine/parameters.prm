@@ -11,6 +11,9 @@ set Initial embedding space refinement           = 5
 set Local refinements steps near embedded domain = 2
 set Use displacement in embedded interface       = false
 set Verbosity level                              = 10
+set Number of elements to embed into embedding   = 1
+set Number of solves to the stationnary problem  = 3
+set Size of displacement                         = -0.1
 
 
 subsection Embedded configuration

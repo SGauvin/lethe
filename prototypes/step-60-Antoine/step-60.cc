@@ -127,6 +127,11 @@ namespace Step60
       // A flag to keep track if we were initialized or not
       bool initialized = false;
 
+      // Paramètres en plus
+      unsigned int nbelem = 1;
+      unsigned int timesteps = 1;
+      double displacement = 0.1;
+
 
     };
 
@@ -246,6 +251,11 @@ namespace Step60
     add_parameter("Coupling quadrature order", coupling_quadrature_order);
     add_parameter("Verbosity level", verbosity_level);
 
+    // Paramètres en plus
+    add_parameter("Number of elements to embed into embedding", nbelem);
+    add_parameter("Number of solves to the stationnary problem", timesteps);
+    add_parameter("Size of displacement", displacement);
+
     // Once the parameter file has been parsed, then the parameters are good to
     // go. Set the internal variable `initialized` to true.
     parse_parameters_call_back.connect([&]() -> void { initialized = true; });
@@ -305,7 +315,8 @@ namespace Step60
     // The same is done with the embedded grid. Since the embedded grid is
     // deformed, we first need to setup the deformation mapping. We do so in the
     // following few lines:
-    const unsigned int nbelem = 2;
+    unsigned int nb_elem = parameters.nbelem;
+
     double radius = 0.2;
     double xcoord;
     double ycoord;
@@ -322,7 +333,7 @@ namespace Step60
     Point<spacedim> centerpoint_elemn(0.0, 0.0);
     GridGenerator::hyper_sphere(embedded_gridn, centerpoint_elemn, radius);
 
-    for (unsigned int elem =0; elem < nbelem; elem++) {
+    for (unsigned int elem =0; elem < nb_elem; elem++) {
 
       // Point aléatoire dans cercle total
       while (true) {
@@ -744,8 +755,8 @@ namespace Step60
   void DistributedLagrangeProblem<dim, spacedim>::MoveEmbedded()
   {
 
-    double Deplacement_x = 0.1;
-    double Deplacement_y = 0.1;
+    double Deplacement_x = parameters.displacement;
+    double Deplacement_y = parameters.displacement;
 
     GridTools::shift(Point<spacedim>(Deplacement_x, Deplacement_y), embedded_grid);
 
@@ -810,11 +821,11 @@ namespace Step60
     AssertThrow(parameters.initialized, ExcNotInitialized());
     deallog.depth_console(parameters.verbosity_level);
 
-    int Deplacements =  5; // mettre 1 pour aucun déplacements
+    unsigned int Deplacements =  parameters.timesteps; // mettre 1 pour aucun déplacements
 
     setup_mapping();
     
-    for (int move = 0; move < Deplacements; move++) {
+    for (unsigned int move = 0; move < Deplacements; move++) {
       std::cout << "Situation #" << (move+1) << std::endl;
     
       setup_grids_and_dofs();
