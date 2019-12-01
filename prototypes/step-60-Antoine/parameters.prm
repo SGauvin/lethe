@@ -1,6 +1,7 @@
 # Listing of Parameters
 # ---------------------
 subsection Distributed Lagrange<1,2>
+set Beta                                         = 10
 set Coupling quadrature order                    = 3
 set Embedded configuration finite element degree = 1
 set Embedded space finite element degree         = 1
@@ -8,12 +9,17 @@ set Embedding space finite element degree        = 1
 set Homogeneous Dirichlet boundary ids           = 0, 1, 2, 3
 set Initial embedded space refinement            = 7
 set Initial embedding space refinement           = 5
-set Local refinements steps near embedded domain = 2
+set Local refinements steps near embedded domain = 3
 set Use displacement in embedded interface       = false
 set Verbosity level                              = 10
-set Number of elements to embed into embedding   = 1
-set Number of solves to the stationnary problem  = 3
-set Size of displacement                         = -0.1
+set Number of elements to embed into embedding   = 3
+set Number of solves to the stationnary problem  = 4
+set Size of displacement in x                    = 0.2
+set Size of displacement in y                    = 0.0
+set Size of displacement in z                    = 0.1
+set Radius of embedding domain                   = 1
+set Radius of embedded domain                    = 0.2
+set Do you want to test L2 error (0/1)           = 0
 
 
 subsection Embedded configuration
@@ -26,7 +32,7 @@ subsection Embedded configuration
 # `pi=3.1415926536' and then use `pi' in the expression of the actual
 # formula. (That said, for convenience this class actually defines both
 # `pi' and `Pi' by default, but you get the idea.)
-set Function constants  = R=.2, Cx=.0, Cy=.0, Cz = 0.2               # default:
+set Function constants  = R=.3, Cx=.4, Cy=.4                 # default:
 
 # The formula that denotes the function you want to evaluate for
 # particular values of the independent variables. This expression may
@@ -41,7 +47,7 @@ set Function constants  = R=.2, Cx=.0, Cy=.0, Cz = 0.2               # default:
 # If the function you are describing represents a vector-valued function
 # with multiple components, then separate the expressions for individual
 # components by a semicolon.
-set Function expression = x; y  # default: 0
+set Function expression = x; y # default: 0
 
 # The names of the variables as they will be used in the function,
 # separated by commas. By default, the names of variables at which the
@@ -102,9 +108,9 @@ subsection Schur solver control
 set Log frequency = 1
 set Log history   = false
 set Log result    = true
-set Max steps     = 10000   # default: 100
+set Max steps     = 1000   # default: 100
 set Reduction     = 1.e-2 # default: 1.e-2
-set Tolerance     = 1.e-10 # default: 1.e-10
+set Tolerance     = 1.e-12 # default: 1.e-10
 end
 
 end
