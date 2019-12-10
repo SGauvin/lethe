@@ -5,9 +5,6 @@ notifications:
   email: false
   webhooks: https://www.travisbuddy.com/
 
-travisBuddy:
-    regex: "((?i)failed)"
-
 addons:
   apt:
     packages:
@@ -16,16 +13,17 @@ addons:
 services:
   - docker
 
-# cache:
-#   directories:
-#   - docker_images
+cache:
+  directories:
+    - docker-cache
 
-# before_cache:
-# - docker save -o docker_images/images.tar $(docker images -a -q)
-
-before_install:
-# - docker load -i docker_images/images.tar || true
-- docker pull heltai/dealii:v9.1.1-gcc-mpi
+before_script:
+  - |
+    filename=docker-cache/saved_images.tar
+    if [[ -f "$filename" ]]; then docker load < "$filename"; fi
+    mkdir -p docker-cache
+    docker pull heltai/dealii:v9.1.1-gcc-mpi
+    docker save -o "$filename" heltai/dealii:v9.1.1-gcc-mpi
 
 script:
 - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
