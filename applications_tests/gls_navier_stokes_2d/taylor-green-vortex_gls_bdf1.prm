@@ -76,7 +76,7 @@ subsection mesh
     set type                 = dealii
     set grid type       = hyper_cube
     set grid arguments  = 0 : 6.28318530718 : true
-    set initial refinement   = 5                        # initial mesh refinement
+    set initial refinement   = 4                        # initial mesh refinement
 end
 # --------------------------------------------------
 # Mesh Adaptation Control
@@ -123,7 +123,7 @@ subsection linear solver
   set max iters                             = 5000
   set relative residual                     = 1e-4
   set minimum residual                      = 1e-9
-  set ilu preconditioner fill               = 1
+  set ilu preconditioner fill               = 0
   set ilu preconditioner absolute tolerance = 1e-5
   set ilu preconditioner relative tolerance = 1.00
 end
