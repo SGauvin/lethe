@@ -15,10 +15,34 @@ addons:
 services:
   - docker
 
+matrix:
+  include:
+    - name: Static checks (clang-format)
+      stage: check
+      env: STATIC_CHECKS=yes
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-xenial-8
+          packages:
+            - clang-format-8
+
+    - name: Compile and ctest
+      stage: build
+      env: COMPILE_AND_TEST=yes
+
 before_script:
-    docker pull heltai/dealii:v9.1.1-gcc-mpi
+  - if [ "$COMPILE_AND_TEST" = "yes" ]
+      docker pull heltai/dealii:v9.1.1-gcc-mpi
+    fi
 
 script:
-- export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
-- echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
-- docker run heltai/dealii:v9.1.1-gcc-mpi /bin/sh -c "git clone https://github.com/SGauvin/lethe && cd lethe && git checkout $BRANCH && mkdir build && cd build && cmake ../ -DCMAKE_BUILD_TYPE=Release && make -j2 && ctest -j"
+  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+  - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
+  - if [ "$COMPILE_AND_TEST" = "yes" ]
+      docker run heltai/dealii:v9.1.1-gcc-mpi /bin/sh -c "git clone https://github.com/SGauvin/lethe && cd lethe && git checkout $BRANCH && mkdir build && cd build && cmake ../ -DCMAKE_BUILD_TYPE=Release && make -j2 && ctest -j"
+    fi
+  - if [ "$STATIC_CHECKS" = "yes" ]
+      python run-clang-format.py -r source
+      python run-clang-format.py -r include
+    fi
