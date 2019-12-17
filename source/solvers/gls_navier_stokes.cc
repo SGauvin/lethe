@@ -52,7 +52,8 @@ GLSNavierStokesSolver<dim>::setup_dofs()
 {
   TimerOutput::Scope t(this->computing_timer, "setup_dofs");
 
-  // Clear the preconditioner before the matrix they are associated with is cleared
+  // Clear the preconditioner before the matrix they are associated with is
+  // cleared
   amg_preconditioner.reset();
   ilu_preconditioner.reset();
 
