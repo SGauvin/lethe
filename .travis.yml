@@ -1,6 +1,8 @@
 sudo: required
 language: cpp
 
+os: linux
+
 notifications:
   email: false
   webhooks: https://www.travisbuddy.com/
