@@ -32,7 +32,7 @@ matrix:
 
 before_script:
   - if [ "$STEP" = "compile_and_test" ]; then
-      docker pull heltai/dealii:v9.1.1-gcc-mpi
+      docker pull heltai/dealii:v9.1.1-gcc-mpi;
     fi
 
 script:
@@ -40,9 +40,9 @@ script:
   - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
   - if [ "$STEP" = "static_check" ]; then
       python run-clang-format.py -r source &&
-      python run-clang-format.py -r include
+      python run-clang-format.py -r include;
     fi
   - if [ "$STEP" = "compile_and_test" ]; then
-      docker run heltai/dealii:v9.1.1-gcc-mpi /bin/sh -c "git clone https://github.com/SGauvin/lethe && cd lethe && git checkout $BRANCH && mkdir build && cd build && cmake ../ -DCMAKE_BUILD_TYPE=Release && make -j2 && ctest -j"
+      docker run heltai/dealii:v9.1.1-gcc-mpi /bin/sh -c "git clone https://github.com/SGauvin/lethe && cd lethe && git checkout $BRANCH && mkdir build && cd build && cmake ../ -DCMAKE_BUILD_TYPE=Release && make -j2 && ctest -j";
     fi
  
