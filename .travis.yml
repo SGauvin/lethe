@@ -22,9 +22,10 @@ matrix:
       addons:
         apt:
           sources:
-            - llvm-toolchain-xenial-8
+            - llvm-toolchain-trusty-5.0
+            - key_url: 'http://apt.llvm.org/llvm-snapshot.gpg.key'
           packages:
-            - clang-format-8
+            - clang-format-5.0
 
     - name: Compile and ctest
       stage: build
