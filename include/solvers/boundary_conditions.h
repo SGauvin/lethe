@@ -27,7 +27,7 @@ using namespace dealii;
 
 namespace BoundaryConditions
 {
-  enum BoundaryType
+            enum BoundaryType
   {
     noslip,
     slip,
