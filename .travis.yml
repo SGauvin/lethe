@@ -38,10 +38,11 @@ before_script:
 script:
   - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
   - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
+  - if [ "$STATIC_CHECKS" = "yes" ]; then
+      python run-clang-format.py -r source &&
+      python run-clang-format.py -r include
+    fi
   - if [ "$COMPILE_AND_TEST" = "yes" ]; then
       docker run heltai/dealii:v9.1.1-gcc-mpi /bin/sh -c "git clone https://github.com/SGauvin/lethe && cd lethe && git checkout $BRANCH && mkdir build && cd build && cmake ../ -DCMAKE_BUILD_TYPE=Release && make -j2 && ctest -j"
     fi
-  - if [ "$STATIC_CHECKS" = "yes" ]; then
-      python run-clang-format.py -r source
-      python run-clang-format.py -r include
-    fi
+ 
